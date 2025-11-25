@@ -7,13 +7,14 @@ format:
     toc-title: "Table of Contents"
 ---
 
-Welcome to the Exploratory Data Analysis of flights in the U.S. from June 2019! As you scroll down, you'll see the data has already been processed into csvs and is simply being visualized. Prior to the data visualization, the below data was queried using MySql and exported from MySql Workbench.
+Welcome to the Exploratory Data Analysis of flights in the U.S. from June 2019! As you scroll down, you'll see the data has already been processed and is simply being visualized. Prior to the creation of the data visualization below, the data was queried using MySql and exported from MySql Workbench.
 
 ## Part 1: Data and Package Loading
 
 ```{r}
-library(dplyr)
-library(ggplot2)
+library(dplyr, quietly = TRUE)
+library(ggplot2, quietly = TRUE)
+library(plotly, quietly = TRUE)
 rank_days <- read.csv('data/rank_days.csv')
 max_early <- read.csv('data/max_early.csv')
 max_delay <- read.csv('data/max_delay.csv')
@@ -24,12 +25,38 @@ cancelled_flights <- read.csv('data/cancelled_flights.csv')
 airport_max_delay <- read.csv('data/airport_max_delay.csv')
 ```
 
-## Part 2: Time Series
+## Part 2: Time Series - Number of Flights
 
 ```{r}
 flight_report$FlightDate <- as.Date(flight_report$FlightDate)
-flight_report |> ggplot(aes(x=FlightDate, y=three_day_avg)) + 
-geom_point(size = 3) + 
-labs(xlab = "Date", y = "Average Number of Flights (Past Three Days)", title = "Average Number of Flights over the Past Three Days in June, 2019") + 
-theme(plot.title = element_text(hjust = 0.5))
+my_time_series <- flight_report |> ggplot(aes(x=FlightDate, y=three_day_avg)) + 
+geom_point(size = 1) + 
+geom_area(alpha = 1/2, fill = 'lightblue') +
+labs(x = "Date", y = "Average Number of Flights (Past Three Days)", title = "Average Number of Flights over the Past Three Days in June, 2019") + 
+theme(plot.title = element_text(size = 8, hjust = 0.5))
+interactive_plot <- ggplotly(my_time_series)
+interactive_plot
 ```
+
+## Part 3: Multi-Numeric Variable Trend - Airlines
+
+```{r}
+combined_data <- inner_join(max_delay, max_early, by = "name")
+combined_data$Max_Early <- abs(combined_data$Max_Early)
+
+my_scatterplot <- combined_data |> ggplot(aes(x=Max_Early, y=Max_Delay, color = name)) +
+geom_point(shape = 18) +
+theme_minimal()+
+labs(x = "Maximum Early Departure (Min)", y = "Maximum Flight Delay (Min)", color = "Airline", title = "Airline Maximum Early Departure vs Delay") + 
+theme(plot.title = element_text(size = 11, hjust = 0.5), legend.position = "none")
+interactive_scatter <- ggplotly(my_scatterplot)
+interactive_scatter
+```
+
+# Pearson Correlation Coefficient
+```{r}
+p <- cor(combined_data$Max_Early, combined_data$Max_Delay)
+print(p)
+```
+
+## Part 4: Geospatial - Airports

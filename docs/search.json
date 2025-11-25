@@ -11,20 +11,34 @@
     "href": "index.html",
     "title": "DSAN 6300: Mini-Project",
     "section": "",
-    "text": "Welcome to the Exploratory Data Analysis of flights in the U.S. from June 2019! As you scroll down, you’ll see the data has already been processed into csvs and is simply being visualized. Prior to the data visualization, the below data was queried using MySql and exported from MySql Workbench."
+    "text": "Welcome to the Exploratory Data Analysis of flights in the U.S. from June 2019! As you scroll down, you’ll see the data has already been processed and is simply being visualized. Prior to the creation of the data visualization below, the data was queried using MySql and exported from MySql Workbench."
   },
   {
     "objectID": "index.html#part-1-data-and-package-loading",
     "href": "index.html#part-1-data-and-package-loading",
     "title": "DSAN 6300: Mini-Project",
     "section": "Part 1: Data and Package Loading",
-    "text": "Part 1: Data and Package Loading\n\n\nCode\nlibrary(dplyr)\n\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\n\nCode\nlibrary(ggplot2)\nrank_days &lt;- read.csv('data/rank_days.csv')\nmax_early &lt;- read.csv('data/max_early.csv')\nmax_delay &lt;- read.csv('data/max_delay.csv')\nmax_avg_delay &lt;- read.csv('data/max_avg_delay.csv')\nflight_report &lt;- read.csv('data/flight_report.csv')\ncancelled_reason &lt;- read.csv('data/cancelled_reason.csv')\ncancelled_flights &lt;- read.csv('data/cancelled_flights.csv')\nairport_max_delay &lt;- read.csv('data/airport_max_delay.csv')"
+    "text": "Part 1: Data and Package Loading\n\n\nCode\nlibrary(dplyr, quietly = TRUE)\n\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\n\nCode\nlibrary(ggplot2, quietly = TRUE)\nlibrary(plotly, quietly = TRUE)\n\n\n\nAttaching package: 'plotly'\n\n\nThe following object is masked from 'package:ggplot2':\n\n    last_plot\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\nThe following object is masked from 'package:graphics':\n\n    layout\n\n\nCode\nrank_days &lt;- read.csv('data/rank_days.csv')\nmax_early &lt;- read.csv('data/max_early.csv')\nmax_delay &lt;- read.csv('data/max_delay.csv')\nmax_avg_delay &lt;- read.csv('data/max_avg_delay.csv')\nflight_report &lt;- read.csv('data/flight_report.csv')\ncancelled_reason &lt;- read.csv('data/cancelled_reason.csv')\ncancelled_flights &lt;- read.csv('data/cancelled_flights.csv')\nairport_max_delay &lt;- read.csv('data/airport_max_delay.csv')"
   },
   {
-    "objectID": "index.html#part-2-time-series",
-    "href": "index.html#part-2-time-series",
+    "objectID": "index.html#part-2-time-series---number-of-flights",
+    "href": "index.html#part-2-time-series---number-of-flights",
     "title": "DSAN 6300: Mini-Project",
-    "section": "Part 2: Time Series",
-    "text": "Part 2: Time Series\n\n\nCode\nflight_report$FlightDate &lt;- as.Date(flight_report$FlightDate)\nflight_report |&gt; ggplot(aes(x=FlightDate, y=three_day_avg)) + \ngeom_point(size = 3) + \nlabs(xlab = \"Date\", y = \"Average Number of Flights (Past Three Days)\", title = \"Average Number of Flights over the Past Three Days in June, 2019\") + \ntheme(plot.title = element_text(hjust = 0.5))"
+    "section": "Part 2: Time Series - Number of Flights",
+    "text": "Part 2: Time Series - Number of Flights\n\n\nCode\nflight_report$FlightDate &lt;- as.Date(flight_report$FlightDate)\nmy_time_series &lt;- flight_report |&gt; ggplot(aes(x=FlightDate, y=three_day_avg)) + \ngeom_point(size = 1) + \ngeom_area(alpha = 1/2, fill = 'lightblue') +\nlabs(x = \"Date\", y = \"Average Number of Flights (Past Three Days)\", title = \"Average Number of Flights over the Past Three Days in June, 2019\") + \ntheme(plot.title = element_text(size = 8, hjust = 0.5))\ninteractive_plot &lt;- ggplotly(my_time_series)\ninteractive_plot"
+  },
+  {
+    "objectID": "index.html#part-3-multi-numeric-variable-trend---airlines",
+    "href": "index.html#part-3-multi-numeric-variable-trend---airlines",
+    "title": "DSAN 6300: Mini-Project",
+    "section": "Part 3: Multi-Numeric Variable Trend - Airlines",
+    "text": "Part 3: Multi-Numeric Variable Trend - Airlines\n\n\nCode\ncombined_data &lt;- inner_join(max_delay, max_early, by = \"name\")\ncombined_data$Max_Early &lt;- abs(combined_data$Max_Early)\n\nmy_scatterplot &lt;- combined_data |&gt; ggplot(aes(x=Max_Early, y=Max_Delay, color = name)) +\ngeom_point(shape = 18) +\ntheme_minimal()+\nlabs(x = \"Maximum Early Departure (Min)\", y = \"Maximum Flight Delay (Min)\", color = \"Airline\", title = \"Airline Maximum Early Departure vs Delay\") + \ntheme(plot.title = element_text(size = 11, hjust = 0.5), legend.position = \"none\")\ninteractive_scatter &lt;- ggplotly(my_scatterplot)\ninteractive_scatter"
+  },
+  {
+    "objectID": "index.html#part-4-geospatial---airports",
+    "href": "index.html#part-4-geospatial---airports",
+    "title": "DSAN 6300: Mini-Project",
+    "section": "Part 4: Geospatial - Airports",
+    "text": "Part 4: Geospatial - Airports"
   }
 ]
