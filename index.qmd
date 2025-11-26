@@ -12,9 +12,9 @@ Welcome to the Exploratory Data Analysis of flights in the U.S. from June 2019! 
 ## Part 1: Data and Package Loading
 
 ```{r}
-library(dplyr, quietly = TRUE)
-library(ggplot2, quietly = TRUE)
-library(plotly, quietly = TRUE)
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(plotly,))
 rank_days <- read.csv('data/rank_days.csv')
 max_early <- read.csv('data/max_early.csv')
 max_delay <- read.csv('data/max_delay.csv')
@@ -25,7 +25,7 @@ cancelled_flights <- read.csv('data/cancelled_flights.csv')
 airport_max_delay <- read.csv('data/airport_max_delay.csv')
 ```
 
-## Part 2: Time Series - Number of Flights
+## Part 2: Number of Flights
 
 ```{r}
 flight_report$FlightDate <- as.Date(flight_report$FlightDate)
@@ -39,7 +39,12 @@ interactive_plot <- ggplotly(my_time_series)
 interactive_plot
 ```
 
-## Part 3: Multi-Numeric Variable Trend - Airlines
+```{r}
+pie(rank_days$num_flights, labels = rank_days$Day,
+main = "Number of Flights by Day of Week")
+```
+
+## Part 3: Airline Trends
 
 ```{r}
 combined_data <- inner_join(max_delay, max_early, by = "name")
@@ -60,11 +65,10 @@ p <- cor(combined_data$Max_Early, combined_data$Max_Delay)
 print(p)
 ```
 
-## Part 4: Deep Dive - Airports
+## Part 4: Airport Deep Dive 
 
 ```{r}
 max_avg_delay$Origin <- factor(max_avg_delay$Origin, levels = max_avg_delay$Origin)
-max_avg_delay <- max_avg_delay |> arrange(Avg_Delay)
 
 top50 <- head(max_avg_delay, 50)
 
@@ -76,4 +80,46 @@ top50 |> ggplot(aes(x=Origin, y=Avg_Delay)) +
   xlab("") +
   ylab("Average Delay (Min)") +
   ggtitle("Top 50 Airports with the Greatest Average Delays")
+```
+
+```{r}
+back50 <- tail(max_avg_delay, 50)
+
+back50 |> ggplot(aes(x=Origin, y=Avg_Delay)) +
+  geom_segment(aes(x=Origin, xend=Origin, y=0, yend=Avg_Delay)) +
+  geom_point() +
+  theme_minimal() +
+  coord_flip() +
+  xlab("") +
+  ylab("Average Delay (Min)") +
+  ggtitle("Top 50 Airports with the Lowest Average Delays")
+```
+
+```{r}
+my_airport <- plot_ly(
+  airport_max_delay,
+  x = ~name,
+  y = ~Avg_Delay,
+  size = ~Avg_Delay,
+  customdata = ~airport_name,
+  type = "scatter",
+  mode = "markers",
+  marker = list(sizemode = "diameter"),
+  hovertemplate = "%{customdata}<extra></extra>"
+)
+
+my_airport |> layout(showlegend = FALSE, xaxis = list(title="Airline"), yaxis = list(title="Average Delay (Min)"), title = list(text="Highest Average Delay per Airline and Airport"))
+```
+
+## Part 5: Flight Cancellations
+
+```{r}
+cancelled_summary <- cancelled_reason %>%
+  group_by(Reason) %>%
+  summarise(total = sum(num_cancellations))
+
+cancelled_summary
+
+pie(cancelled_summary$total, labels = cancelled_summary$Reason,
+main = "Flight Cancellations by Reason")
 ```
