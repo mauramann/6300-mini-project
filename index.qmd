@@ -7,14 +7,21 @@ format:
     toc-title: "Table of Contents"
 ---
 
-Welcome to the Exploratory Data Analysis of flights in the U.S. from June 2019! As you scroll down, you'll see the data has already been processed and is simply being visualized. Prior to the creation of the data visualization below, the data was queried using MySql and exported from MySql Workbench.
+Welcome to an Exploratory Data Analysis of flights in the U.S. from June 2019! As you scroll down, you'll see the data has already been processed and is simply being visualized. Prior to the creation of the data visualizations below, the data was queried using MySql and exported from MySql Workbench.
 
-## Part 1: Data and Package Loading
+As you scroll, you will see that many of the graphs are interactive. Please hover over them to get all of the information displayed!
+
+## Part 1: Data and Package Load
+
+To start the project, I loaded data and packages. Importantly, the data I am exploring includes the total number of flights in June 2019 in the United States, the number of cancelled flights, airline specific information on delays/early departures, and airport specific information on delays.
 
 ```{r}
+# Load packages
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(plotly,))
+suppressPackageStartupMessages(library(plotly))
+
+# Load data sets
 rank_days <- read.csv('data/rank_days.csv')
 max_early <- read.csv('data/max_early.csv')
 max_delay <- read.csv('data/max_delay.csv')
@@ -28,7 +35,10 @@ airport_max_delay <- read.csv('data/airport_max_delay.csv')
 ## Part 2: Number of Flights
 
 ```{r}
+# Make sure flights date are date type
 flight_report$FlightDate <- as.Date(flight_report$FlightDate)
+
+# Create time series interactive plot
 my_time_series <- flight_report |> ggplot(aes(x=FlightDate, y=three_day_avg)) + 
 geom_point(size = 1) + 
 geom_area(alpha = 1/2, fill = 'lightblue') +
@@ -40,16 +50,26 @@ interactive_plot
 ```
 
 ```{r}
-pie(rank_days$num_flights, labels = rank_days$Day,
-main = "Number of Flights by Day of Week")
+# Load color palettes
+library(RColorBrewer)
+
+# Create pie chart
+my_pie <- plot_ly(rank_days, 
+labels = ~Day, 
+values=~num_flights, 
+type="pie")
+
+my_pie |> layout(title = list(text="Number of Flights by Day of Week"))
 ```
 
 ## Part 3: Airline Trends
 
 ```{r}
+# Combine data sets together
 combined_data <- inner_join(max_delay, max_early, by = "name")
 combined_data$Max_Early <- abs(combined_data$Max_Early)
 
+# Create scatter plot
 my_scatterplot <- combined_data |> ggplot(aes(x=Max_Early, y=Max_Delay, color = name)) +
 geom_point(shape = 18) +
 theme_minimal()+
@@ -61,46 +81,56 @@ interactive_scatter
 
 ### Pearson Correlation Coefficient
 ```{r}
-p <- cor(combined_data$Max_Early, combined_data$Max_Delay)
-print(p)
+cor(combined_data$Max_Early, combined_data$Max_Delay)
 ```
 
 ## Part 4: Airport Deep Dive 
 
 ```{r}
+# Make Origin into a factor type
 max_avg_delay$Origin <- factor(max_avg_delay$Origin, levels = max_avg_delay$Origin)
 
+# Grab top 50 airports
 top50 <- head(max_avg_delay, 50)
 
+# Plot lollipop graph
 top50 |> ggplot(aes(x=Origin, y=Avg_Delay)) +
-  geom_segment(aes(x=Origin, xend=Origin, y=0, yend=Avg_Delay)) +
-  geom_point() +
+  geom_segment(aes(x=Origin, xend=Origin, y=0, yend=Avg_Delay),
+  color=ifelse((top50$Origin == "PAH"), "orange","black"),
+  size=ifelse((top50$Origin == "PAH"), 1.5, 0.6)) +
+  geom_point(color=ifelse((top50$Origin == "PAH"), "orange","black"),
+  size=ifelse((top50$Origin == "PAH"), 4, 1)) +
   theme_minimal() +
   coord_flip() +
-  xlab("") +
-  ylab("Average Delay (Min)") +
-  ggtitle("Top 50 Airports with the Greatest Average Delays")
+  labs(x = "", y = "Average Delay (Min)", title = "Top 50 Airports with the Greatest Average Delays")+
+  annotate("text", x=grep("OTH", top50$Origin)*0.75, y=top50$Avg_Delay[which(top50$Origin=="OTH")]*1.01, label="Barkley Regional", color="orange", size=3 , angle=0, fontface="bold", hjust=0)
 ```
 
 ```{r}
+# Grab bottom 50 airports
 back50 <- tail(max_avg_delay, 50)
 
+# Plot Lollipop graph
 back50 |> ggplot(aes(x=Origin, y=Avg_Delay)) +
-  geom_segment(aes(x=Origin, xend=Origin, y=0, yend=Avg_Delay)) +
-  geom_point() +
+  geom_segment(aes(x=Origin, xend=Origin, y=0, yend=Avg_Delay),
+  color=ifelse((back50$Origin == "AKN"), "orange", "black"),
+  size=ifelse((back50$Origin == "AKN"), 1.5, 0.6)) +
+  geom_point(color=ifelse((back50$Origin == "AKN"), "orange", "black"),
+  size=ifelse((back50$Origin == "AKN"), 4, 1)) +
   theme_minimal() +
   coord_flip() +
-  xlab("") +
-  ylab("Average Delay (Min)") +
-  ggtitle("Top 50 Airports with the Lowest Average Delays")
+  labs(x = "", y = "Average Delay (Min)", title = "Bottom 50 Airports with the Greatest Average Delays")+
+  annotate("text", x=grep("AKN", back50$Origin), y=back50$Avg_Delay[which(back50$Origin=="AKN")]*1.2, label="King Salmon Airport", color="orange", size=3 , angle=0, fontface="bold", hjust=0)
 ```
 
 ```{r}
+# Create bubble graph
 my_airport <- plot_ly(
   airport_max_delay,
   x = ~name,
   y = ~Avg_Delay,
   size = ~Avg_Delay,
+  color = ~name,
   customdata = ~airport_name,
   type = "scatter",
   mode = "markers",
@@ -114,12 +144,15 @@ my_airport |> layout(showlegend = FALSE, xaxis = list(title="Airline"), yaxis = 
 ## Part 5: Flight Cancellations
 
 ```{r}
-cancelled_summary <- cancelled_reason %>%
-  group_by(Reason) %>%
-  summarise(total = sum(num_cancellations))
+# Create summary table
+cancelled_summary <- cancelled_reason |>
+group_by(Reason) |> summarise(total = sum(num_cancellations))
 
-cancelled_summary
+# Create pie chart
+my_piechart <- plot_ly(cancelled_summary, 
+labels = ~Reason, 
+values=~total, 
+type="pie")
 
-pie(cancelled_summary$total, labels = cancelled_summary$Reason,
-main = "Flight Cancellations by Reason")
+my_piechart |> layout(title = list(text="Flight Cancellations by Reason"))
 ```
