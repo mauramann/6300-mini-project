@@ -63,7 +63,9 @@ interactive_plot
 
 <br>
 
-Secondly, I looked at the overall break down of number of flights per week day. The weekend has a slightly larger number of total flights, however, the weekdays are all about even and not far off from the weekend values. This tells me that even though Saturday and Sunday have higher flight numbers, the past three day averages for Sunday, Monday, and Tuesday get lowered either by a lower week day value and/or week day values are more consistent throughout the entire month compared to weekends, possibly due to consistently planned business travel compared to inconsistent summer weekend travel. 
+Secondly, I looked at the overall break down of number of flights per week day. The weekend has a slightly larger number of total flights, however, the weekdays are all about even and not far off from the weekend values. 
+
+This tells me that even though Saturday and Sunday have higher flight numbers, the past three day averages for Sunday, Monday, and Tuesday get lowered either by a lower week day value and/or week day values are more consistent throughout the entire month compared to weekends. This could possibly due to airlines having consistently planned business travel compared to inconsistent summer weekend travel. 
 
 ```{r}
 # Load color palettes
@@ -80,9 +82,9 @@ my_pie |> layout(title = list(text="Number of Flights by Day of Week"))
 
 ## Part 3: Airline Trends
 
-In this next section, I wanted to dive deeper into airline trends. I specifically wanted to see if there was a relationship between an airline having the maximum delay and the maximum early departure.
+In this next section, I wanted to dive deeper into airline trends. I specifically wanted to see if there was a relationship between an airline having the maximum departure delay and the maximum early departure.
 
-I did this by plotting the ranking of the airlines with the largest maximum early departure on the x-axis (ranking of 1 being the largest early departure) and the maximum delay value on the y-axis. Each point represents an indiviudal airline that you can see by hoving over the data point.
+I did this by plotting the ranking of the airlines with the largest maximum early departure on the x-axis (ranking of 1 being the largest early departure) and the maximum departure delay value on the y-axis. Each point represents an indiviudal airline that you can see by hoving over the data point.
 
 ```{r}
 # Combine data sets together
@@ -110,7 +112,7 @@ In viewing the graph, I don't see any correlation between the two variables. How
 cor(combined_data$early_rank, combined_data$Max_Delay)
 ```
 
-The pearson correlation coefficient value reveals there is virtually no correlation at all between maximum early departure ranking and maximum flight delay. This could be potentially very important information for travelers when booking since we can't confidently say that an airline with the lowest maximum delay also has the highest maximum early departure (and therefore shouldn't be a deciding factor when choosing an airline).
+The pearson correlation coefficient value reveals there is virtually no correlation at all between maximum early departure ranking and maximum departure delay. This could be potentially very important information for travelers when booking since we can't confidently say that an airline with the lowest maximum delay also has the highest maximum early departure (and therefore shouldn't be a deciding factor when choosing an airline).
 
 ## Part 4: Airport Deep Dive 
 
@@ -135,6 +137,8 @@ my_airport <- plot_ly(
 
 my_airport |> layout(showlegend = FALSE, xaxis = list(title="Airline"), yaxis = list(title="Average Delay (Min)"), title = list(text="Highest Average Delay per Airline and Airport"))
 ```
+
+<br>
 
 ExpressJet Airlines and Asheville Regional Airport have the highest delay per airline/airport combination. However, it's also interesting to see that both Raleigh and Indianapolis are the highest delay airport for multiple airlines, indicating these airports might be busy traveler or connecting hubs that frequently experience delays.
 
