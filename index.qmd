@@ -40,7 +40,7 @@ Next, I wanted to explore the number of flights. I first made a time series grap
 
 Hover over the data points to see the fluctuations in the number of flights over the month!
 
-I observed a cylical pattern where the past three day average number of flights was lower on Sunday, Monday, and Tuesday and higher on Wednesday, Thursday, Friday, and Saturday. This means when weekend numbers are rolled into the averages, they are lower.
+I observed a cylical pattern where the past three day average number of flights was lower on Sunday, Monday, and Tuesday and higher on Wednesday, Thursday, Friday, and Saturday. This means that when weekend flight numbers are rolled into the averages, the average is lower.
 
 ```{r}
 # Make sure flight dates are date type
@@ -64,7 +64,7 @@ interactive_plot
 
 <br>
 
-Secondly, I looked at the overall break down of number of flights per week day. The weekend has a slightly larger number of total flights, however, the weekdays are all about even and not far off from the weekend values. This tells me that even though Saturday and Sunday have higher flight numbers, the past three day averages for Sunday, Monday, and Tuesday get lowered either by a lower week day value and/or week day values having consistent values throughout the entire month compared to weekends. 
+Secondly, I looked at the overall break down of number of flights per week day. The weekend has a slightly larger number of total flights, however, the weekdays are all about even and not far off from the weekend values. This tells me that even though Saturday and Sunday have higher flight numbers, the past three day averages for Sunday, Monday, and Tuesday get lowered either by a lower week day value and/or week day values are more consistent throughout the entire month compared to weekends, possibly due to consistently planned business travel compared to unconsistent summer weekend travel. 
 
 ```{r}
 # Load color palettes
