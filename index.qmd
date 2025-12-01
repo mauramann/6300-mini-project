@@ -27,7 +27,6 @@ suppressPackageStartupMessages(library(plotly))
 rank_days <- read.csv('data/rank_days.csv')
 max_early <- read.csv('data/max_early.csv')
 max_delay <- read.csv('data/max_delay.csv')
-max_avg_delay <- read.csv('data/max_avg_delay.csv')
 flight_report <- read.csv('data/flight_reports.csv')
 cancelled_reason <- read.csv('data/cancelled_reason.csv')
 cancelled_flights <- read.csv('data/cancelled_flights.csv')
@@ -83,18 +82,20 @@ my_pie |> layout(title = list(text="Number of Flights by Day of Week"))
 
 In this next section, I wanted to dive deeper into airline trends. I specifically wanted to see if there was a relationship between an airline having the maximum delay and the maximum early departure.
 
-I did this by plotting the maximum early departure on the x-axis and the maximum delay on the y-axis. Each point represents an indiviudal airline that you can see by hoving over the data point.
+I did this by plotting the ranking of the airlines with the largest maximum early departure on the x-axis (ranking of 1 being the largest early departure) and the maximum delay value on the y-axis. Each point represents an indiviudal airline that you can see by hoving over the data point.
 
 ```{r}
 # Combine data sets together
+early_rank = 1:17
+max_early$early_rank <- early_rank
 combined_data <- inner_join(max_delay, max_early, by = "name")
-combined_data$Max_Early <- abs(combined_data$Max_Early)
+
 
 # Create scatter plot
-my_scatterplot <- combined_data |> ggplot(aes(x=Max_Early, y=Max_Delay, color = name)) +
+my_scatterplot <- combined_data |> ggplot(aes(x=early_rank, y=Max_Delay, color = name)) +
 geom_point(shape = 18) +
 theme_minimal()+
-labs(x = "Maximum Early Departure (Min)", y = "Maximum Flight Delay (Min)", color = "Airline", title = "Airline Maximum Early Departure vs Delay") + 
+labs(x = "Maximum Early Departure (Min) Ranking", y = "Maximum Flight Delay (Min)", color = "Airline", title = "Airline Maximum Delay vs Early Departure") + 
 theme(plot.title = element_text(size = 11, hjust = 0.5), legend.position = "none")
 interactive_scatter <- ggplotly(my_scatterplot)
 interactive_scatter
@@ -106,61 +107,14 @@ In viewing the graph, I don't see any correlation between the two variables. How
 
 ### Pearson Correlation Coefficient
 ```{r}
-cor(combined_data$Max_Early, combined_data$Max_Delay)
+cor(combined_data$early_rank, combined_data$Max_Delay)
 ```
 
-The pearson correlation coefficient value reveals there is virtually no correlation at all between maximum early departure and maximum delay. This could be potentially very important information for travelers when booking since we can't confidently say that an airline with the lowest maximum delay also has the highest maximum early departure (and therefore shouldn't be a deciding factor when choosing an airline).
+The pearson correlation coefficient value reveals there is virtually no correlation at all between maximum early departure ranking and maximum flight delay. This could be potentially very important information for travelers when booking since we can't confidently say that an airline with the lowest maximum delay also has the highest maximum early departure (and therefore shouldn't be a deciding factor when choosing an airline).
 
 ## Part 4: Airport Deep Dive 
 
-After looking into the airline, I wanted to switch to look at airports. First, I wanted to look at the average delay amongst all airports and look at the top 50 airports in-depth.
-
-As you can see below, the Barkley Regional Airport in West Paducah, Kentucky has the highest average delay.
-
-```{r}
-# Make Origin into a factor type
-max_avg_delay$Origin <- factor(max_avg_delay$Origin, levels = max_avg_delay$Origin)
-
-# Grab top 50 airports
-top50 <- head(max_avg_delay, 50)
-
-# Plot lollipop graph
-top50 |> ggplot(aes(x=Origin, y=Avg_Delay)) +
-  geom_segment(aes(x=Origin, xend=Origin, y=0, yend=Avg_Delay),
-  color=ifelse((top50$Origin == "PAH"), "purple","black"),
-  size=ifelse((top50$Origin == "PAH"), 1.5, 0.6)) +
-  geom_point(color=ifelse((top50$Origin == "PAH"), "purple","black"),
-  size=ifelse((top50$Origin == "PAH"), 3, 1)) +
-  theme_minimal() +
-  coord_flip() +
-  labs(x = "", y = "Average Delay (Min)", title = "Top 50 Airports with the Greatest Average Delays")+
-  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 7)) +
-  annotate("text", x=grep("OTH", top50$Origin)*1.75, y=top50$Avg_Delay[which(top50$Origin=="OTH")]*1.01, label="Barkley Regional", color="purple", size=2 , angle=0, fontface="bold", hjust=0)
-```
-
-Similarly, I wanted to look at the bottom 50 airports that had the lowest average delay.
-
-If you're traveling anytime soon, you may want to look at King Salmon Airport in King Salmon, Alaska as they win by a land slide!
-
-```{r}
-# Grab bottom 50 airports
-back50 <- tail(max_avg_delay, 50)
-
-# Plot Lollipop graph
-back50 |> ggplot(aes(x=Origin, y=Avg_Delay)) +
-  geom_segment(aes(x=Origin, xend=Origin, y=0, yend=Avg_Delay),
-  color=ifelse((back50$Origin == "AKN"), "purple", "black"),
-  size=ifelse((back50$Origin == "AKN"), 1.5, 0.6)) +
-  geom_point(color=ifelse((back50$Origin == "AKN"), "purple", "black"),
-  size=ifelse((back50$Origin == "AKN"), 3, 1)) +
-  theme_minimal() +
-  coord_flip() +
-  labs(x = "", y = "Average Delay (Min)", title = "Top 50 Airports with the Lowest Average Delays")+
-  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 7)) +
-  annotate("text", x=grep("AKN", back50$Origin), y=back50$Avg_Delay[which(back50$Origin=="AKN")]*1.2, label="King Salmon Airport", color="purple", size=2.5 , angle=0, fontface="bold", hjust=0)
-```
-
-Looking specifically at airports and airlines, I then wanted to see which airport had the highest average delay for each airline. It turns out there's a lot of variability in airports as seen below!
+Looking specifically at airports and airlines, I wanted to see which airport had the highest average delay for each airline. It turns out there's a lot of variability in airports as seen below!
 
 If you like traveling with a specific airline, hover over the bubble  to see which airport you may want to avoid.
 
@@ -181,6 +135,8 @@ my_airport <- plot_ly(
 
 my_airport |> layout(showlegend = FALSE, xaxis = list(title="Airline"), yaxis = list(title="Average Delay (Min)"), title = list(text="Highest Average Delay per Airline and Airport"))
 ```
+
+It looks like ExpressJet Airlines and Asheville Regional Airport have the highest delay per airline/airport combination.
 
 ## Part 5: Flight Cancellations
 
