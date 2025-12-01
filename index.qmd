@@ -37,7 +37,7 @@ airport_max_delay <- read.csv('data/airport_max_delay.csv')
 
 Next, I wanted to explore the number of flights. I first made a time series graph, looking at the total number of flights over the course of the month.
 
-Hover over the data points to see the fluctuations in the number of flights over the month!
+Hover over the data points to see the fluctuations!
 
 I observed a cylical pattern where the past three day average number of flights was lower on Sunday, Monday, and Tuesday and higher on Wednesday, Thursday, Friday, and Saturday. This means that when weekend flight numbers are rolled into the averages, the average is lower.
 
@@ -95,7 +95,7 @@ combined_data <- inner_join(max_delay, max_early, by = "name")
 my_scatterplot <- combined_data |> ggplot(aes(x=early_rank, y=Max_Delay, color = name)) +
 geom_point(shape = 18) +
 theme_minimal()+
-labs(x = "Maximum Early Departure (Min) Ranking", y = "Maximum Flight Delay (Min)", color = "Airline", title = "Airline Maximum Delay vs Early Departure") + 
+labs(x = "Maximum Early Departure Ranking", y = "Maximum Flight Delay (Min)", color = "Airline", title = "Airline Maximum Delay vs Early Departure") + 
 theme(plot.title = element_text(size = 11, hjust = 0.5), legend.position = "none")
 interactive_scatter <- ggplotly(my_scatterplot)
 interactive_scatter
@@ -116,7 +116,7 @@ The pearson correlation coefficient value reveals there is virtually no correlat
 
 Looking specifically at airports and airlines, I wanted to see which airport had the highest average delay for each airline. It turns out there's a lot of variability in airports as seen below!
 
-If you like traveling with a specific airline, hover over the bubble  to see which airport you may want to avoid.
+If you like traveling with a specific airline, hover over the bubble to see which airport you may want to avoid.
 
 ```{r}
 # Create bubble graph
@@ -136,7 +136,7 @@ my_airport <- plot_ly(
 my_airport |> layout(showlegend = FALSE, xaxis = list(title="Airline"), yaxis = list(title="Average Delay (Min)"), title = list(text="Highest Average Delay per Airline and Airport"))
 ```
 
-It looks like ExpressJet Airlines and Asheville Regional Airport have the highest delay per airline/airport combination.
+ExpressJet Airlines and Asheville Regional Airport have the highest delay per airline/airport combination. However, it's also interesting to see that both Raleigh and Indianapolis are the highest delay airport for multiple airlines, indicating these airports might be busy traveler or connecting hubs that frequently experience delays.
 
 ## Part 5: Flight Cancellations
 
