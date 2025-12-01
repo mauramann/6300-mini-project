@@ -64,7 +64,7 @@ interactive_plot
 
 <br>
 
-Secondly, I looked at the overall break down of number of flights per week day. The weekend has a slightly larger number of total flights, however, the weekdays are all about even and not far off from the weekend values. This tells me that even though Saturday and Sunday have higher flight numbers, the past three day averages for Sunday, Monday, and Tuesday get lowered either by a lower week day value and/or week day values are more consistent throughout the entire month compared to weekends, possibly due to consistently planned business travel compared to unconsistent summer weekend travel. 
+Secondly, I looked at the overall break down of number of flights per week day. The weekend has a slightly larger number of total flights, however, the weekdays are all about even and not far off from the weekend values. This tells me that even though Saturday and Sunday have higher flight numbers, the past three day averages for Sunday, Monday, and Tuesday get lowered either by a lower week day value and/or week day values are more consistent throughout the entire month compared to weekends, possibly due to consistently planned business travel compared to inconsistent summer weekend travel. 
 
 ```{r}
 # Load color palettes
